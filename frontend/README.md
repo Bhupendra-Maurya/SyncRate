@@ -1,73 +1,85 @@
-# React + TypeScript + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Frontend:    React + TypeScript + Tailwind CSS
+Backend:     Node.js + Express
+Database:    PostgreSQL (persistent data) + Redis (real-time data)
+APIs:        CoinGecko/Binance Public API (free price data)
+Hosting:     Vercel (frontend), Railway/Render (backend)
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## What Each Does
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+**React (Frontend)**
+- Builds the user interface (charts, watchlists, portfolio)
+- Real-time updates via WebSocket
+- Responsive design for desktop/mobile
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+**Node.js + Express (Backend)**
+- Handles API requests from React
+- Manages user authentication
+- Fetches price data from external APIs
+- Updates Redis with live prices
+- Serves data to frontend via REST or WebSocket
+
+**PostgreSQL**
+- Stores permanent data:
+  - User accounts & passwords
+  - User watchlists
+  - Portfolio holdings
+  - Transaction history
+  - User preferences
+
+**Redis**
+- Stores temporary, fast-access data:
+  - Current cryptocurrency prices
+  - Order books (if you add trading)
+  - User sessions
+  - Cache to reduce database queries
+
+## Data Flow Example
 ```
+User opens app (React)
+    ↓
+React connects to Node.js/Express backend
+    ↓
+Backend fetches price data from CoinGecko API
+    ↓
+Backend stores prices in Redis (fast access)
+    ↓
+Backend retrieves user data from PostgreSQL
+    ↓
+Backend sends data to React via WebSocket (real-time)
+    ↓
+React displays updated prices and user portfolio in real-time
+```
+
+## Why This Combination Works
+
+- **Fast real-time updates** - Redis provides sub-millisecond responses for prices
+- **Reliable data storage** - PostgreSQL ensures data is never lost
+- **Scalable** - Can handle growth from hundreds to millions of users
+- **Professional** - Used by real companies, looks great on resume
+- **Free to start** - PostgreSQL and Redis are open-source
+- **Easy to deploy** - Railway, Render, and other platforms support this stack easily
+
+## Project Structure You'd Have
+```
+my-trading-app/
+├── frontend/                 (React + TypeScript)
+│   ├── src/
+│   │   ├── components/       (Charts, Watchlist, Portfolio)
+│   │   ├── pages/
+│   │   ├── hooks/
+│   │   └── services/         (API calls to backend)
+│   └── package.json
+│
+├── backend/                  (Node.js + Express)
+│   ├── src/
+│   │   ├── routes/           (API endpoints)
+│   │   ├── controllers/
+│   │   ├── middleware/       (Auth, validation)
+│   │   ├── services/         (Business logic)
+│   │   ├── db/              (PostgreSQL queries)
+│   │   └── redis/           (Redis connection)
+│   ├── .env                 (API keys, secrets)
+│   └── package.json
+│
+└── docker-compose.yml       (PostgreSQL + Redis setup)
