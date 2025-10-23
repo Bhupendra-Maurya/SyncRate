@@ -1,16 +1,29 @@
 import dotenv from "dotenv";
+
+// Load environment variables
 dotenv.config();
 
 import app from "./app.js";
 import connectDB from "./config/database.js";
 import logger from "./utils/logger.js";
 import mongoose from "mongoose";
+import { errorHandler } from "./middleware/errorHandler.js";
 
-const PORT = process.env.PORT || 4000;
+// Configuration
+const PORT = process.env.PORT;
+// const NODE_ENV = process.env.NODE_ENV || "development";
 
+// Global error handler
+app.use(errorHandler)
+
+
+
+// Start server
 const startServer = async () => {
+  // Connect to MongoDB
   await connectDB();
 
+  // Start Express server
   app.listen(PORT, () => {
     logger.info(`🚀 Server running on http://localhost/${PORT}`);
   });
@@ -28,4 +41,5 @@ const startServer = async () => {
   });
 };
 
+// start the server
 startServer();
